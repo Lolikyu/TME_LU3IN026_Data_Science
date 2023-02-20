@@ -14,6 +14,7 @@ Année: LU3IN026 - semestre 2 - 2022-2023, Sorbonne Université
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import random as random
 
 # ------------------------ 
 def genere_dataset_uniform(p, n, binf=-1, bsup=1):
@@ -39,6 +40,30 @@ def genere_dataset_gaussian(positive_center, positive_sigma, negative_center, ne
     dataset = np.concatenate((dataset_negative, dataset_positive))
     label = np.array([-1 for i in range(nb_points)] + [1 for i in range(nb_points)])
     return (dataset, label)
+
+#-------------------------
+def genere_train_test(desc_set, label_set, n_pos, n_neg):
+    """ permet de générer une base d'apprentissage et une base de test
+        desc_set: ndarray avec des descriptions
+        label_set: ndarray avec les labels correspondants
+        n_pos: nombre d'exemples de label +1 à mettre dans la base d'apprentissage
+        n_neg: nombre d'exemples de label -1 à mettre dans la base d'apprentissage
+        Hypothèses: 
+           - desc_set et label_set ont le même nombre de lignes)
+           - n_pos et n_neg, ainsi que leur somme, sont inférieurs à n (le nombre d'exemples dans desc_set)
+    """
+    #base d'apprentissage:
+    L_train = random.sample([elem[0] for elem in np.argwhere(label_set == 1)], n_pos) +\
+              random.sample([elem[0] for elem in np.argwhere(label_set == -1)], n_neg)
+    desc_set_train = desc_set[L_train]
+    label_set_train = label_set[L_train]
+
+    #base de test:
+    L_test = [i for i in range(0, len(desc_set)) if i not in L_train]
+    desc_set_test = desc_set[L_test]
+    label_set_test = label_set[L_test]
+    
+    return (desc_set_train, label_set_train), (desc_set_test, label_set_test)
 
 # ------------------------
 def plot2DSet(desc,labels):    
