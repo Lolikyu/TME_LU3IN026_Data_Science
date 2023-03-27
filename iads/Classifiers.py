@@ -12,6 +12,7 @@ Année: LU3IN026 - semestre 2 - 2022-2023, Sorbonne Université
 # Import de packages externes
 import numpy as np
 import pandas as pd
+import math
 from iads import utils as ut
 
 # ---------------------------
@@ -391,3 +392,70 @@ class ClassifierArbreDecision(Classifier):
             Cette fonction modifie GTree par effet de bord
         """
         self.racine.to_graph(GTree)
+        
+# ------------------------
+def shannon(P):
+    """ list[Number] -> float
+        Hypothèse: la somme des nombres de P vaut 1
+        P correspond à une distribution de probabilité
+        rend la valeur de l'entropie de Shannon correspondante
+        rem: la fonction utilise le log dont la base correspond à la taille de P
+    """
+    res = 0
+    b = len(P)
+    if(b==1):
+        return 0
+    for p in P:
+        if(p != 0):
+            res += p*math.log(p,b)
+    return -res
+
+# ------------------------
+def entropie(Y):
+    """ Y : (array) : array de labels
+        rend la valeur de l'entropie de Shannon correspondante
+    """
+    valeurs, nb_fois = np.unique(Y,return_counts=True)
+    return shannon(nb_fois/len(Y))
+
+# ------------------------
+def classe_majoritaire(Y):
+    """ Y : (array) : array de labels
+        rend la classe majoritaire ()
+    """
+    valeurs, nb_fois = np.unique(Y,return_counts=True)
+    return valeurs[np.argmax(nb_fois)]
+
+# ------------------------
+def construit_AD(X,Y,epsilon,LNoms = []):
+    """ X,Y : dataset
+        epsilon : seuil d'entropie pour le critère d'arrêt 
+        LNoms : liste des noms de features (colonnes) de description 
+    """ 
+    entropie_ens = entropie(Y)
+    if (entropie_ens <= epsilon):
+        # ARRET : on crée une feuille
+        noeud = NoeudCategoriel(-1,"Label")
+        noeud.ajoute_feuille(classe_majoritaire(Y))
+    else:
+        min_entropie = 1.1
+        i_best = -1
+        Xbest_valeurs = None
+        
+        for i in range(X.shape[1]):
+            entropie_i = 0
+            Xi = np.unique(X[:,i])
+            for x in Xi:
+                entropie_i += len(Y[X[:,i]==x])/len(Y)*entropie(Y[X[:,i]==x])
+            if entropie_i < min_entropie:
+                min_entropie = entropie_i
+                i_best = i
+                Xbest_valeurs = np.unique(X[:,i])
+        
+        if len(LNoms)>0:  # si on a des noms de features
+            noeud = NoeudCategoriel(i_best,LNoms[i_best])    
+        else:
+            noeud = NoeudCategoriel(i_best)
+        for v in Xbest_valeurs:
+            noeud.ajoute_fils(v,construit_AD(X[X[:,i_best]==v], Y[X[:,i_best]==v],epsilon,LNoms))
+    return noeud
