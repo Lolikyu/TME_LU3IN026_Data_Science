@@ -15,11 +15,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import random as random
-import evaluation as ev
 import math
 import copy
-import Classifiers as cl
-
+from iads import evaluation as ev
+from iads import Classifiers as cl
 # ------------------------ 
 def genere_dataset_uniform(p, n, binf=-1, bsup=1):
     """ int * int * float^2 -> tuple[ndarray, ndarray]
