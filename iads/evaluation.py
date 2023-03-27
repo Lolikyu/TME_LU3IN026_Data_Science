@@ -15,8 +15,9 @@ import pandas as pd
 
 # ------------------------ 
 def crossval_strat(X, Y, n_iterations, iteration):
-    li_1 = np.where(Y == 1)
-    li_2 = np.where(Y == -1)
+    c = Y[0]
+    li_1 = np.where(Y == c)
+    li_2 = np.where(Y != c)
     X1 = X[li_2]
     X2 = X[li_1]
     Y1 = Y[li_2]

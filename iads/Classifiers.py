@@ -224,3 +224,37 @@ class ClassifierPerceptron(Classifier):
         
     def get_allw(self):
         return self.allw
+    
+# ---------------------------
+class ClassifierPerceptronBiais(ClassifierPerceptron):
+    """ Perceptron de Rosenblatt avec biais
+        Variante du perceptron de base
+    """
+    def __init__(self, input_dimension, learning_rate=0.01, init=True):
+        """ Constructeur de Classifier
+            Argument:
+                - input_dimension (int) : dimension de la description des exemples (>0)
+                - learning_rate (par défaut 0.01): epsilon
+                - init est le mode d'initialisation de w: 
+                    - si True (par défaut): initialisation à 0 de w,
+                    - si False : initialisation par tirage aléatoire de valeurs petites
+        """
+        # Appel du constructeur de la classe mère
+        super().__init__(input_dimension, learning_rate, init)
+        # Affichage pour information (décommentez pour la mise au point)
+        # print("Init perceptron biais: w= ",self.w," learning rate= ",learning_rate)
+        
+    def train_step(self, desc_set, label_set):
+        """ Réalise une unique itération sur tous les exemples du dataset
+            donné en prenant les exemples aléatoirement.
+            Arguments:
+                - desc_set: ndarray avec des descriptions
+                - label_set: ndarray avec les labels correspondants
+        """        
+        indice = [i for i in range(len(desc_set))]
+        np.random.shuffle(indice)
+        for i in indice:
+            #xi = desc_set[i] , yi = label_set[i]
+            if self.score(desc_set[i])*label_set[i] < 1:
+                self.w += self.learning_rate * (label_set[i] - self.score(desc_set[i])) * desc_set[i]
+            self.allw.append(self.w.copy())
