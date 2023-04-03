@@ -59,6 +59,7 @@ class Classifier:
         for i in range(len(desc_set)):
             if self.predict(desc_set[i]) == label_set[i]:
                 ratio += 1
+        if(ratio==0): return ratio
         return ratio/len(desc_set)
 
 # ---------------------------
@@ -109,7 +110,50 @@ class ClassifierKNN(Classifier):
         """
         self.data_set = desc_set
         self.label_set = label_set
+        
+# ---------------------------
+class ClassifierKNN_MC(Classifier):
+    """ Classe pour représenter un classifieur par K plus proches voisins.
+        Cette classe hérite de la classe Classifier
+    """
+    def __init__(self, input_dimension, k, c):
+        """ Constructeur de Classifier
+            Argument:
+                - intput_dimension (int) : dimension d'entrée des exemples
+                - k (int) : nombre de voisins à considérer
+                - c (int) : nombre de classes
+            Hypothèse : input_dimension > 0
+        """
+        self.dimension = input_dimension
+        self.k = k
+        self.c = c
+        
+    def score(self, x):
+        """ rend un talbeau contenant la proportion de chaque classe parmi les k ppv de x (valeur réelle)
+            x: une description : un ndarray
+        """
+        liste_dist_pts = np.argsort(np.linalg.norm(self.data_set - x, axis=1))
+        scoreTab = {i:0 for i in np.unique(self.label_set)}
+        for index in liste_dist_pts[:self.k]:
+            scoreTab[str(self.label_set[index])] += 1
+        return scoreTab
+            
+    
+    def predict(self, x):
+        """ rend la classe ayant le score maximal 
+            x: une description : un ndarray
+        """
+        return np.argmax(self.score(x))
 
+    def train(self, desc_set, label_set):
+        """ Permet d'entrainer le modele sur l'ensemble donné
+            desc_set: ndarray avec des descriptions
+            label_set: ndarray avec les labels correspondants
+            Hypothèse: desc_set et label_set ont le même nombre de lignes
+        """
+        self.data_set = desc_set
+        self.label_set = label_set
+        
 # ---------------------------
 class ClassifierLineaireRandom(Classifier):
     """ Classe pour représenter un classifieur linéaire aléatoire

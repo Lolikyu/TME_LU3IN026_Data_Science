@@ -12,6 +12,7 @@ Année: LU3IN026 - semestre 2 - 2022-2023, Sorbonne Université
 # import externe
 import numpy as np
 import pandas as pd
+import copy
 
 # ------------------------ 
 def crossval_strat(X, Y, n_iterations, iteration):
@@ -41,3 +42,17 @@ def analyse_perfs(L):
     return (moyenne, ecart_type)
 
 # ------------------------ 
+def validation_croisee(C, DS, nb_iter):
+    """ Classifieur * tuple[array, array] * int -> tuple[ list[float], float, float]
+    """
+    X, Y = DS   
+    perf = []
+        
+    newC = copy.deepcopy(C)
+    for i in range(nb_iter):
+        X_train, Y_train, X_test, Y_test = crossval_strat(X, Y, nb_iter, i)
+        newC.train(X_train, Y_train)
+        perf.append(newC.accuracy(X_test, Y_test))    
+
+    (perf_moy, perf_sd) = analyse_perfs(perf)
+    return (perf, perf_moy, perf_sd)
