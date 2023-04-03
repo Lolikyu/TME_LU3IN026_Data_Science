@@ -133,9 +133,9 @@ class ClassifierKNN_MC(Classifier):
             x: une description : un ndarray
         """
         liste_dist_pts = np.argsort(np.linalg.norm(self.data_set - x, axis=1))
-        scoreTab = {i:0 for i in np.unique(self.label_set)}
+        scoreTab = np.zeros(self.c)
         for index in liste_dist_pts[:self.k]:
-            scoreTab[str(self.label_set[index])] += 1
+            scoreTab[self.labels[self.label_set[index]]] += 1
         return scoreTab
             
     
@@ -143,7 +143,7 @@ class ClassifierKNN_MC(Classifier):
         """ rend la classe ayant le score maximal 
             x: une description : un ndarray
         """
-        return np.argmax(self.score(x))
+        return self.labels2[np.argmax(self.score(x))]
 
     def train(self, desc_set, label_set):
         """ Permet d'entrainer le modele sur l'ensemble donné
@@ -153,6 +153,9 @@ class ClassifierKNN_MC(Classifier):
         """
         self.data_set = desc_set
         self.label_set = label_set
+        self.labels = {i:j for i,j in zip(np.unique(self.label_set), range(self.c))}
+        self.labels2 = {i:j for i,j in zip(range(self.c), np.unique(self.label_set))}
+
         
 # ---------------------------
 class ClassifierLineaireRandom(Classifier):
